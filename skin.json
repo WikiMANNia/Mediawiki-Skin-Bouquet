@@ -1,6 +1,6 @@
 {
 	"name": "Bouquet",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"author": [
 		"[http://automattic.com Automattic]",
 		"Jack Phoenix",
@@ -11,36 +11,43 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "skin",
 	"requires": {
-		"MediaWiki": ">= 1.43.0"
+		"MediaWiki": ">= 1.36.0"
 	},
+	"callback": "MediaWiki\\Skin\\Bouquet\\BouquetHooks::onRegistration",
 	"ValidSkinNames": {
 		"bouquet": {
 			"displayname": "Bouquet",
 			"class": "SkinTemplate",
-			"args": [ {
-				"name": "bouquet",
-				"bodyOnly": true,
-				"scripts": [
-					"skins.bouquet.js"
-				],
-				"template": "BouquetTemplate",
-				"styles": [
-					"skins.bouquet"
+			"args": [
+				{
+					"name": "bouquet",
+					"bodyOnly": true,
+					"scripts": [
+						"skins.bouquet.js"
+					],
+					"template": "MediaWiki\\Skin\\Bouquet\\BouquetTemplate",
+					"styles": [
+						"skins.bouquet"
+					]
+				}
+			]
+		}
+	},
+	"attributes": {
+		"Theme": {
+			"Modules": {
+				"bouquet": [
+					"forgetmenot",
+					"pinkdogwood",
+					"tigerlily"
 				]
-			} ]
+			}
 		}
 	},
 	"MessagesDirs": {
 		"SkinBouquet": [
 			"i18n"
 		]
-	},
-	"ThemeModules": {
-		"bouquet": [ "forgetmenot", "pinkdogwood", "tigerlily" ]
-	},
-	"AutoloadClasses": {
-		"BouquetTemplate": "includes/BouquetTemplate.php",
-		"BouquetSkinNavigationService": "includes/BouquetSkinNavigationService.php"
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "",
@@ -112,5 +119,8 @@
 			"+ext.advancedSearch.styles": "resources/skinStyles/ext.advancedSearch.less"
 		}
 	},
-	"manifest_version": 1
+	"AutoloadNamespaces": {
+		"MediaWiki\\Skin\\Bouquet\\": "includes/"
+	},
+	"manifest_version": 2
 }

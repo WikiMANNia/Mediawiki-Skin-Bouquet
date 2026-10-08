@@ -1,9 +1,13 @@
 <?php
 
+namespace MediaWiki\Skin\Bouquet;
+
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Skin\BaseTemplate;
+use MediaWiki\SpecialPage\SpecialPage;
 
 class BouquetTemplate extends BaseTemplate {
 
@@ -63,8 +67,9 @@ class BouquetTemplate extends BaseTemplate {
 		global $wgSitename;
 
 		$skin = $this->getSkin();
+		$title = $skin->getTitle();
 
-		$this->data['pageLanguage'] = $skin->getTitle()->getPageLanguage()->getHtmlCode();
+		$this->data['pageLanguage'] = $title->getPageLanguage()->getHtmlCode();
 
 ?>
 <div id="page" class="hfeed">
@@ -113,10 +118,10 @@ class BouquetTemplate extends BaseTemplate {
 								echo htmlspecialchars( $menuNodes[$level0]['text'], ENT_QUOTES )
 							?>
 						</a>
-							<?php if ( $hasChildren ) { ?>
-							<ul class="children">
+						<?php if ( $hasChildren ) { ?>
+						<ul class="children">
 <?php
-									foreach ( $menuNodes[$level0]['children'] as $level1 ) {
+							foreach ( $menuNodes[$level0]['children'] as $level1 ) {
 ?>
 							<li class="page_item">
 								<a href="<?php echo htmlspecialchars( $menuNodes[$level1]['href'], ENT_QUOTES ) ?>">
@@ -216,7 +221,6 @@ class BouquetTemplate extends BaseTemplate {
 
 		echo '<div id="site-generator-wrapper">';
 
-		// @todo FIXME/CHECKME
 		foreach ( $validFooterIcons as $blockName => &$footerIcons ) { ?>
 	<div id="f-<?php echo htmlspecialchars( $blockName ); ?>ico">
 <?php
@@ -230,6 +234,7 @@ class BouquetTemplate extends BaseTemplate {
 	</div>
 <?php
 		}
+
 
 		$i = 0;
 		$footerLen = count( $validFooterLinks );
@@ -290,28 +295,28 @@ class BouquetTemplate extends BaseTemplate {
 
 	function searchBox() {
 ?>
-						<aside id="search-3" class="widget widget_search" role="search">
-							<form role="search" method="get" id="searchform" class="searchform" action="<?php $this->text( 'wgScript' ) ?>">
-								<div>
-									<label class="screen-reader-text" for="searchInput"><?php $this->msg( 'search' ) ?></label>
-									<input type="hidden" name="title" value="<?php $this->text( 'searchtitle' ) ?>"/>
-									<?php
-										echo $this->makeSearchInput( [ 'id' => 'searchInput' ] );
-										echo $this->makeSearchButton( 'go', [
-											'id' => 'searchGoButton',
-											'class' => 'searchButton',
-											'value' => $this->getMsg( 'searcharticle' )->text()
-										] );
-										echo '&#160;';
-										echo $this->makeSearchButton( 'fulltext', [
-											'id' => 'mw-searchButton',
-											'class' => 'searchButton',
-											'value' => $this->getMsg( 'searchbutton' )->text()
-										] );
-									?>
-								</div>
-							</form>
-						</aside>
+		<aside id="search-3" class="widget widget_search" role="search">
+			<form role="search" method="get" id="searchform" class="searchform" action="<?php $this->text( 'wgScript' ) ?>">
+			<div>
+				<label class="screen-reader-text" for="searchInput"><?php $this->msg( 'search' ) ?></label>
+				<input type="hidden" name="title" value="<?php $this->text( 'searchtitle' ) ?>"/>
+				<?php
+					echo $this->makeSearchInput( [ 'id' => 'searchInput' ] );
+					echo $this->makeSearchButton( 'go', [
+						'id' => 'searchGoButton',
+						'class' => 'searchButton',
+						'value' => $this->getMsg( 'searcharticle' )->text()
+					] );
+					echo '&#160;';
+					echo $this->makeSearchButton( 'fulltext', [
+						'id' => 'mw-searchButton',
+						'class' => 'searchButton',
+						'value' => $this->getMsg( 'searchbutton' )->text()
+					] );
+				?>
+			</div>
+			</form>
+		</aside>
 <?php
 	}
 
@@ -338,7 +343,8 @@ class BouquetTemplate extends BaseTemplate {
 		<h1 class="widget-title"><?php $this->msg( 'toolbox' ) ?></h1>
 		<ul>
 <?php
-		foreach ( $this->data['sidebar']['TOOLBOX'] as $key => $tbItem ) {
+		$toolbox = $this->data['sidebar']['TOOLBOX'];
+		foreach ( $toolbox as $key => $tbItem ) {
 			echo $this->makeListItem( $key, $tbItem );
 		}
 
@@ -414,5 +420,3 @@ class BouquetTemplate extends BaseTemplate {
 		}
 	}
 }
-
-

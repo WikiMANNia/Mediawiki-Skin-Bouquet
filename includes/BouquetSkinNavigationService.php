@@ -1,4 +1,7 @@
 <?php
+
+namespace MediaWiki\Skin\Bouquet;
+
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 
@@ -11,9 +14,7 @@ class BouquetSkinNavigationService {
 
 	const version = '0.01';
 
-	/**
-	 * @var bool Should the message we're rendering be parsed in the wiki's content language?
-	 */
+	/** @var bool Is the message we're supposed to parse in the wiki's content language (true) or not? */
 	public $forContent;
 
 	/**
@@ -42,11 +43,11 @@ class BouquetSkinNavigationService {
 		}
 
 		if ( empty( $nodes ) ) {
-			if ( $this->forContent ) {
-				$lines = explode( "\n", wfMessage( $messageName )->inContentLanguage()->text() );
-			} else {
-				$lines = explode( "\n", wfMessage( $messageName )->text() );
-			}
+			$lines =
+				$this->forContent
+				? explode( "\n", wfMessage( $messageName )->inContentLanguage()->text() )
+				: explode( "\n", wfMessage( $messageName )->text() );
+
 			$nodes = $this->parseLines( $lines, $maxChildrenAtLevel );
 
 			if ( $useCache || $this->forContent ) {
@@ -63,23 +64,23 @@ class BouquetSkinNavigationService {
 	 * Function used by parseMessage() above.
 	 *
 	 * @param array $lines Newline-separated lines from the supplied MW: msg
-	 * @param array $maxChildrenAtLevel Array:
+	 * @param array $maxChildrenAtLevel
 	 * @return array
 	 */
 	private function parseLines( $lines, $maxChildrenAtLevel = [] ) {
 		$nodes = [];
 
-		if ( is_array( $lines ) && count( $lines ) > 0 ) {
+		if ( is_array( $lines ) && ( count( $lines ) > 0 ) ) {
 			$lastDepth = 0;
 			$i = 0;
 			$lastSkip = null;
 
 			foreach ( $lines as $line ) {
 				// we are interested only in lines that are not empty and start with asterisk
-				if ( trim( $line ) != '' && $line[0] == '*' ) {
+				if ( ( trim( $line ) != '' ) && ( $line[0] == '*' ) ) {
 					$depth = strrpos( $line, '*' ) + 1;
 
-					if ( $lastSkip !== null && $depth >= $lastSkip ) {
+					if ( ( $lastSkip !== null ) && ( $depth >= $lastSkip ) ) {
 						continue;
 					} else {
 						$lastSkip = null;
@@ -143,7 +144,7 @@ class BouquetSkinNavigationService {
 		// trim [ and ] from line to have just http://en.wikipedia.org instead of [http://en.wikipedia.org] for external links
 		$lineArr[0] = trim( $lineArr[0], '[]' );
 
-		if ( count( $lineArr ) == 2 && $lineArr[1] != '' ) {
+		if ( ( count( $lineArr ) == 2 ) && ( $lineArr[1] != '' ) ) {
 			$link = trim( wfMessage( $lineArr[0] )->inContentLanguage()->text() );
 			$desc = trim( $lineArr[1] );
 		} else {
@@ -159,11 +160,19 @@ class BouquetSkinNavigationService {
 			$link = $lineArr[0];
 		}
 
-		$urlProtocols = MediaWikiServices::getInstance()->getUrlUtils()->validProtocols();
+		$services = MediaWikiServices::getInstance();
+		$urlUtils =
+			$services->hasService( 'UrlUtils' )
+			// MediaWiki 1.39+
+			? $services->getUrlUtils()
+			// MediaWiki >1.39
+			: wfGetUrlUtils();
+
+		$urlProtocols = $urlUtils->validProtocols();
 		if ( preg_match( '/^(?:' . $urlProtocols . ')/', $link ) ) {
 			$href = $link;
 		} else {
-			if ( !$link ) {
+			if ( empty( $link ) ) {
 				$href = '#';
 			} elseif ( $link[0] == '#' ) {
 				$href = '#';
@@ -182,5 +191,4 @@ class BouquetSkinNavigationService {
 			'href' => $href
 		];
 	}
-
 }
