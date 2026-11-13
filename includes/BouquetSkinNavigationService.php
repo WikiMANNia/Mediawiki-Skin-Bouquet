@@ -14,7 +14,9 @@ class BouquetSkinNavigationService {
 
 	const version = '0.01';
 
-	/** @var bool Is the message we're supposed to parse in the wiki's content language (true) or not? */
+	/**
+	 * @var bool Should the message we're rendering be parsed in the wiki's content language?
+	 */
 	public $forContent;
 
 	/**
@@ -43,11 +45,11 @@ class BouquetSkinNavigationService {
 		}
 
 		if ( empty( $nodes ) ) {
-			$lines =
+			$msg_text =
 				$this->forContent
-				? explode( "\n", wfMessage( $messageName )->inContentLanguage()->text() )
-				: explode( "\n", wfMessage( $messageName )->text() );
-
+				? wfMessage( $messageName )->inContentLanguage()->text()
+				: wfMessage( $messageName )->text();
+			$lines = explode( "\n", $msg_text );
 			$nodes = $this->parseLines( $lines, $maxChildrenAtLevel );
 
 			if ( $useCache || $this->forContent ) {
@@ -165,7 +167,7 @@ class BouquetSkinNavigationService {
 			$services->hasService( 'UrlUtils' )
 			// MediaWiki 1.39+
 			? $services->getUrlUtils()
-			// MediaWiki >1.39
+			// MediaWiki <1.39
 			: wfGetUrlUtils();
 
 		$urlProtocols = $urlUtils->validProtocols();

@@ -43,7 +43,7 @@ Version 1.4.1 - Oct 31, 2020
 -- Ditch the Skin::setupSkinUserCss method(), require MW 1.35+
 -- Bug: T266735
 
-Version 2.0.0 - Sep 16, 2022
+Version 2.0 - Sep 16, 2022
 - Upgrade for 1.39
 - Remove output of HEAD tag
 - Remove SkinTemplate class and use skin registration
@@ -62,9 +62,21 @@ Version 2.0.0 - Sep 16, 2022
 - Aug 16, 2025
 -- Remove "i18n-all-lists-margins" and "interface-message-box" features to avoid deprecation notice, require MW 1.43+
 
-Version 2.1.0 - Oct 7, 2026
+Version 2.1 - Oct 7, 2026
 
 - Add namespace
 - Add file ´Compat.php´
 - Add backward compatibility to REL1_36
 - Migrated ´skin.json´ from manifest version 1 to manifest version 2.
+
+Version 2.2 - Nov 12, 2026
+
+- Migrate Bouquet to modern skin menus
+- Declare the modern menus skin option in skin.json and build personal tools from content_navigation instead of the deprecated
+- getPersonalTools().
+- Build the content actions list from content_navigation instead of the deprecated content_actions template variable, keeping the same menu order and dropping redundant tabs as core did.
+
+Version 2.2.1 - Nov 13, 2026
+
+- Replaced direct access to global variables with ´GlobalVarConfig()´ and ´get()´.
+- Fixed an issue where PHP errors or warnings could appear inside HTML attributes.

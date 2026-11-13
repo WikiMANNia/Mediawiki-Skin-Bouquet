@@ -1,6 +1,6 @@
 {
 	"name": "Bouquet",
-	"version": "2.1.0",
+	"version": "2.2.1",
 	"author": [
 		"[http://automattic.com Automattic]",
 		"Jack Phoenix",
@@ -18,19 +18,27 @@
 		"bouquet": {
 			"displayname": "Bouquet",
 			"class": "SkinTemplate",
-			"args": [
-				{
-					"name": "bouquet",
-					"bodyOnly": true,
-					"scripts": [
-						"skins.bouquet.js"
-					],
-					"template": "MediaWiki\\Skin\\Bouquet\\BouquetTemplate",
-					"styles": [
-						"skins.bouquet"
-					]
-				}
-			]
+			"args": [ {
+				"name": "bouquet",
+				"bodyOnly": true,
+				"scripts": [
+					"skins.bouquet.js"
+				],
+				"template": "MediaWiki\\Skin\\Bouquet\\BouquetTemplate",
+				"menus": [
+					"user-page",
+					"user-interface-preferences",
+					"user-menu",
+					"notifications",
+					"associated-pages",
+					"views",
+					"actions",
+					"variants"
+				],
+				"styles": [
+					"skins.bouquet"
+				]
+			} ]
 		}
 	},
 	"attributes": {

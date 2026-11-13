@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Skin\Bouquet;
 
+use MediaWiki\Config\GlobalVarConfig;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
@@ -18,7 +19,10 @@ class BouquetTemplate extends BaseTemplate {
 	 * @return string Logo image URL
 	 */
 	private function getLogo() {
-		global $wgStylePath, $wgDefaultTheme;
+
+		$config = new GlobalVarConfig();
+		$defaultTheme = $config->get( "DefaultTheme" );
+		$stylePath = $config->get( "StylePath" );
 
 		$logoURL = '';
 		$customLogo = MediaWikiServices::getInstance()->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
@@ -27,7 +31,7 @@ class BouquetTemplate extends BaseTemplate {
 			// Prefer a custom logo over the defaults (obviously!)
 			$logoURL = $customLogo->getUrl();
 		} else {
-			$logoURL = "{$wgStylePath}/Bouquet/resources/images/pink-header.png";
+			$logoURL = "{$stylePath}/Bouquet/resources/images/pink-header.png";
 			// $wgDefaultTheme is provided by [[mw:Extension:Theme]] and it is set
 			// by default at least on ShoutWiki, but probably not elsewhere
 			// Grumble grumble grumble...
@@ -35,8 +39,8 @@ class BouquetTemplate extends BaseTemplate {
 			$themeFromRequest = $this->getSkin()->getRequest()->getVal( 'usetheme', '' );
 			if ( $themeFromRequest ) {
 				$themeName = $themeFromRequest;
-			} elseif ( $wgDefaultTheme != 'default' ) {
-				$themeName = $wgDefaultTheme;
+			} elseif ( $defaultTheme != 'default' ) {
+				$themeName = $defaultTheme;
 			} else {
 				$themeName = false;
 			}
@@ -46,11 +50,11 @@ class BouquetTemplate extends BaseTemplate {
 			$map = [
 				'forgetmenot' => 'forget-me-not',
 				'pinkdogwood' => 'pink-dogwood',
-				'tigerlily' => 'tiger-lily',
+				'tigerlily' => 'tiger-lily'
 			];
 
 			if ( isset( $map[$themeName] ) && $map[$themeName] ) {
-				$logoURL = "{$wgStylePath}/Bouquet/resources/colors/{$map[$themeName]}/{$map[$themeName]}-header.png";
+				$logoURL = "{$stylePath}/Bouquet/resources/colors/{$map[$themeName]}/{$map[$themeName]}-header.png";
 			}
 		}
 
@@ -64,27 +68,33 @@ class BouquetTemplate extends BaseTemplate {
 	 * outputs a formatted page.
 	 */
 	public function execute() {
+
+		$config = new GlobalVarConfig();
+		$sitename = $config->get( "Sitename" );
 		global $wgSitename;
 
 		$skin = $this->getSkin();
 		$title = $skin->getTitle();
+		$logo_url = $this->getLogo();
+		$mainpage_url = $this->data['nav_urls']['mainpage']['href'];
+		$tagline_msg = $this->msg( 'tagline' );
 
 		$this->data['pageLanguage'] = $title->getPageLanguage()->getHtmlCode();
 
 ?>
 <div id="page" class="hfeed">
-	<header id="branding" role="banner" class="clearfix" style="background-image: url(<?php echo $this->getLogo(); ?>);">
+	<header id="branding" role="banner" class="clearfix" style="background-image: url(<?php echo $logo_url; ?>);">
 		<?php echo Html::element( 'a', [
 				'href' => $this->data['nav_urls']['mainpage']['href'],
 				'class' => 'header-link',
-				'title' => $wgSitename,
+				'title' => $sitename,
 				'rel' => 'home'
 			] + Linker::tooltipAndAccesskeyAttribs( 'p-logo' ) ); ?>
 		<div>
 			<h1 class="firstHeading" id="site-title"><span dir="auto"><?php echo Html::element( 'a', [
-							'href' => $this->data['nav_urls']['mainpage']['href'] ]
-							+ Linker::tooltipAndAccesskeyAttribs( 'p-logo' ), $wgSitename ); ?></span></h1>
-			<h2 id="site-description"><?php $this->msg( 'tagline' ) ?></h2>
+							'href' => $mainpage_url ]
+							+ Linker::tooltipAndAccesskeyAttribs( 'p-logo' ), $sitename ); ?></span></h1>
+			<h2 id="site-description"><?php $tagline_msg ?></h2>
 		</div>
 	</header><!-- #branding -->
 
@@ -221,6 +231,7 @@ class BouquetTemplate extends BaseTemplate {
 
 		echo '<div id="site-generator-wrapper">';
 
+		// @todo FIXME/CHECKME
 		foreach ( $validFooterIcons as $blockName => &$footerIcons ) { ?>
 	<div id="f-<?php echo htmlspecialchars( $blockName ); ?>ico">
 <?php
@@ -234,7 +245,6 @@ class BouquetTemplate extends BaseTemplate {
 	</div>
 <?php
 		}
-
 
 		$i = 0;
 		$footerLen = count( $validFooterLinks );
@@ -290,7 +300,18 @@ class BouquetTemplate extends BaseTemplate {
 	}
 
 	function renderPersonalTools() {
-		$this->customBox( 'personal', $this->getPersonalTools() );
+		if ( version_compare( MW_VERSION, 1.46, '<' ) ) {
+			$personalTools = $this->getPersonalTools();
+		} else {
+			$nav = $this->get( 'content_navigation' );
+			$personalTools = $this->getSkin()->getPersonalToolsForMakeListItem( array_merge(
+				$nav['user-interface-preferences'],
+				$nav['user-page'],
+				$nav['notifications'],
+				$nav['user-menu']
+			) );
+		}
+		$this->customBox( 'personal', $personalTools );
 	}
 
 	function searchBox() {
@@ -328,7 +349,17 @@ class BouquetTemplate extends BaseTemplate {
 	<aside id="p-cactions" class="portlet widget" role="navigation">
 		<h1 class="widget-title"><?php $this->msg( 'views' ) ?></h1>
 			<ul><?php
-				foreach ( $this->data['content_actions'] as $key => $tab ) {
+				if ( version_compare( MW_VERSION, 1.46, '<' ) ) {
+					$contentActions = $this->data['content_actions'];
+				} else {
+					$nav = $this->get( 'content_navigation' );
+					// Flatten the menus the way core built the deprecated content_actions
+					$contentActions = array_filter(
+						array_merge( $nav['associated-pages'], $nav['views'], $nav['actions'], $nav['variants'] ),
+						static fn ( $tab ) => !( $tab['redundant'] ?? false )
+					);
+				}
+				foreach ( $contentActions as $key => $tab ) {
 					echo '
 				' . $this->makeListItem( $key, $tab );
 				} ?>
