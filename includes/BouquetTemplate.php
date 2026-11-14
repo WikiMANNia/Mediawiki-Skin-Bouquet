@@ -77,7 +77,6 @@ class BouquetTemplate extends BaseTemplate {
 		$title = $skin->getTitle();
 		$logo_url = $this->getLogo();
 		$mainpage_url = $this->data['nav_urls']['mainpage']['href'];
-		$tagline_msg = $this->msg( 'tagline' );
 
 		$this->data['pageLanguage'] = $title->getPageLanguage()->getHtmlCode();
 
@@ -94,7 +93,7 @@ class BouquetTemplate extends BaseTemplate {
 			<h1 class="firstHeading" id="site-title"><span dir="auto"><?php echo Html::element( 'a', [
 							'href' => $mainpage_url ]
 							+ Linker::tooltipAndAccesskeyAttribs( 'p-logo' ), $sitename ); ?></span></h1>
-			<h2 id="site-description"><?php $tagline_msg ?></h2>
+			<h2 id="site-description"><?php $this->msg( 'tagline' ) ?></h2>
 		</div>
 	</header><!-- #branding -->
 
