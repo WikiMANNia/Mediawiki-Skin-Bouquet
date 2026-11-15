@@ -52,6 +52,13 @@ class Compat {
 				'MediaWiki\\Context\\RequestContext'
 			);
 		}
+		if ( class_exists( \ExtensionRegistry::class ) && /* < 1.43 */
+			!class_exists( 'MediaWiki\\Registration\\ExtensionRegistry', false ) ) {
+			class_alias(
+				\ExtensionRegistry::class,
+				'MediaWiki\\Registration\\ExtensionRegistry'
+			);
+		}
 		if ( class_exists( \BaseTemplate::class ) && /* < 1.44 */
 			!class_exists( 'MediaWiki\\Skin\\BaseTemplate', false ) ) {
 			class_alias(
@@ -64,6 +71,13 @@ class Compat {
 			class_alias(
 				\Skin::class,
 				'MediaWiki\\Skin\\Skin'
+			);
+		}
+		if ( class_exists( \MediaWiki\User\UserOptionsLookup::class ) && // < 1.46
+			!class_exists( 'MediaWiki\\User\\Options\\UserOptionsLookup', false ) ) {
+			class_alias(
+				\MediaWiki\User\UserOptionsLookup::class,
+				'MediaWiki\\User\\Options\\UserOptionsLookup'
 			);
 		}
 	}

@@ -72,11 +72,18 @@ Version 2.1 - Oct 7, 2026
 Version 2.2 - Nov 12, 2026
 
 - Migrate Bouquet to modern skin menus
-- Declare the modern menus skin option in skin.json and build personal tools from content_navigation instead of the deprecated
-- getPersonalTools().
+- Declare the modern menus skin option in skin.json and build personal tools from content_navigation instead of the deprecated ´getPersonalTools()´.
 - Build the content actions list from content_navigation instead of the deprecated content_actions template variable, keeping the same menu order and dropping redundant tabs as core did.
 
 Version 2.2.1 - Nov 13, 2026
 
 - Replaced direct access to global variables with ´GlobalVarConfig()´ and ´get()´.
 - Fixed an issue where PHP errors or warnings could appear inside HTML attributes.
+
+Version 2.2.2 - Nov 15, 2026
+
+- Fixed an issue getting ´usetheme´ via UserOptionsLookup and then proper select the custom logo.
+
+Version 2.2.3 - Nov 15, 2026
+
+- Take the functions ´getAvailableThemes()´, ´getDefaultTheme()´, ´getSkinBouquetFallbackTheme()´ from skin ´Monaco´.

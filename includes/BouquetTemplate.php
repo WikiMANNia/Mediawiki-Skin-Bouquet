@@ -7,8 +7,10 @@ use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Skin\BaseTemplate;
 use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\Options\UserOptionsLookup;
 
 class BouquetTemplate extends BaseTemplate {
 
@@ -20,29 +22,32 @@ class BouquetTemplate extends BaseTemplate {
 	 */
 	private function getLogo() {
 
-		$config = new GlobalVarConfig();
-		$defaultTheme = $config->get( 'DefaultTheme' );
-		$stylePath = $config->get( 'StylePath' );
+		$services = MediaWikiServices::getInstance();
+		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
+		$stylePath = $services->getMainConfig()->get( 'StylePath' );
 
+		$defaultTheme = self::getDefaultTheme();
 		$logoURL = '';
-		$customLogo = MediaWikiServices::getInstance()->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
 
 		if ( is_object( $customLogo ) ) {
 			// Prefer a custom logo over the defaults (obviously!)
 			$logoURL = $customLogo->getUrl();
 		} else {
 			$logoURL = "{$stylePath}/Bouquet/resources/images/pink-header.png";
-			// $wgDefaultTheme is provided by [[mw:Extension:Theme]] and it is set
-			// by default at least on ShoutWiki, but probably not elsewhere
-			// Grumble grumble grumble...
 			// Pasta from /extensions/Theme/Theme.php
-			$themeFromRequest = $this->getSkin()->getRequest()->getVal( 'usetheme', '' );
+			$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+			$skin = $this->data['skin'];
+			$context = $skin->getContext();
+			$themeFromRequest = $context->getRequest()->getRawVal( 'usetheme' )
+				?? $userOptionsLookup->getOption( $context->getUser(), 'theme' )
+				?? $defaultTheme;
+
 			if ( $themeFromRequest ) {
 				$themeName = $themeFromRequest;
-			} elseif ( $defaultTheme != 'default' ) {
+			} elseif ( $defaultTheme !== 'default' ) {
 				$themeName = $defaultTheme;
 			} else {
-				$themeName = false;
+				$themeName = self::getSkinBouquetFallbackTheme();
 			}
 
 			// internal (hyphenless) theme name -> directory/logo file mapping
@@ -53,12 +58,105 @@ class BouquetTemplate extends BaseTemplate {
 				'tigerlily' => 'tiger-lily'
 			];
 
-			if ( isset( $map[$themeName] ) && $map[$themeName] ) {
-				$logoURL = "{$stylePath}/Bouquet/resources/colors/{$map[$themeName]}/{$map[$themeName]}-header.png";
+			if ( $themeName !== false ) {
+				if ( isset( $map[$themeName] ) && $map[$themeName] ) {
+					$themeName = $map[$themeName];
+				}
+				// Use the theme name directly, if it is not in the map.
+				$logoURL = "{$stylePath}/Bouquet/resources/colors/{$themeName}/{$themeName}-header.png";
 			}
 		}
 
 		return $logoURL;
+	}
+
+	/**
+	 * Gets all enabled themes and skips the specified ones.
+	 */
+	public static function getAvailableThemes(): array {
+
+		$ourSkin = 'bouquet';
+
+		$themes = ExtensionRegistry::getInstance()->getAttribute( 'ThemeModules' );
+
+		if ( !isset( $themes[$ourSkin] ) ) {
+			$themes[$ourSkin] = [];
+		}
+
+		// Skin Bouquet has no skip list at the moment!
+		return $themes[$ourSkin];
+
+		// Filter out the themes defined in $wgSkipThemes for a skin, if any
+		$skipThemes = MediaWikiServices::getInstance()->getMainConfig()->get( 'BouquetSkipThemes' );
+
+		if ( !is_array( $skipThemes ) ) {
+			wfLogWarning(
+				"SkinBouquet: Invalid configuration: 'BouquetSkipThemes' must be an array. Ignoring configuration."
+			);
+			$skipThemes = [];
+		}
+
+		foreach ( $skipThemes as $skippable ) {
+
+			$key = array_search( $skippable, $themes[$ourSkin], true );
+
+			if ( $key !== false ) {
+				unset( $themes[$ourSkin][$key] );
+			}
+		}
+
+		return !empty( $themes[$ourSkin] ) ? $themes[$ourSkin] : [ 'default' => 'default' ];
+	}
+
+	/**
+	 * Gets the default theme.
+	 */
+	public static function getDefaultTheme(): string {
+
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+
+		$availableThemes = self::getAvailableThemes();
+		$hardcodedFallback = self::getSkinBouquetFallbackTheme();
+
+		$fallbackTheme = $config->has( 'FallbackTheme' )
+				? $config->get( 'FallbackTheme' )
+				: $hardcodedFallback;
+		$defaultTheme = $config->has( 'DefaultTheme' )
+				? $config->get( 'DefaultTheme' )
+				: $fallbackTheme;
+
+		// Validate default theme
+		if (
+			!is_string( $defaultTheme ) ||
+			!in_array( $defaultTheme, $availableThemes, true )
+		) {
+			$defaultTheme = $fallbackTheme;
+		}
+
+		// Validate fallback theme
+		if (
+			!is_string( $defaultTheme ) ||
+			!in_array( $defaultTheme, $availableThemes, true )
+		) {
+  			$defaultTheme = $hardcodedFallback;
+		}
+
+		// Last resort: use the first available theme
+		if (
+  			!is_string( $defaultTheme ) ||
+  			!in_array( $defaultTheme, $availableThemes, true )
+		) {
+  			$defaultTheme = reset( $availableThemes );
+		}
+
+		return $defaultTheme;
+	}
+
+	/**
+	 * Fallback, if ´$wgDefaultTheme´ is not valid
+	 */
+	private static function getSkinBouquetFallbackTheme(): string {
+		return 'forgetmenot';
 	}
 
 	/**
@@ -130,15 +228,17 @@ class BouquetTemplate extends BaseTemplate {
 						<ul class="children">
 <?php
 							foreach ( $menuNodes[$level0]['children'] as $level1 ) {
+								$href = htmlspecialchars( $menuNodes[$level1]['href'], ENT_QUOTES );
+								$text = htmlspecialchars( $menuNodes[$level1]['text'], ENT_QUOTES );
 ?>
 							<li class="page_item">
-								<a href="<?php echo htmlspecialchars( $menuNodes[$level1]['href'], ENT_QUOTES ) ?>">
+								<a href="<?php echo $href ?>">
 									<?php
 										// @note The suppression might be incorrect, (though I doubt it), but regardless of
 										// its presence or absence, phan still complains; so pick your poison,
 										// I guess.
 										// @phan-suppress-next-line SecurityCheck-DoubleEscaped
-										echo htmlspecialchars( $menuNodes[$level1]['text'], ENT_QUOTES )
+										echo $text
 									?>
 								</a>
 							</li>
