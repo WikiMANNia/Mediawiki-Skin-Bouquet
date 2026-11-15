@@ -4,5 +4,8 @@
 	},
 	"bouquet-prefs-talkpage": "[[mw:Skin talk:Bouquet|{{int:talk}}]]",
 	"bouquet-desc": "Elegant, simple skin inspired by the beauty found in flowers",
-	"bouquet-navigation": "* mainpage|mainpage-description\n\n** recentchanges-url|recentchanges\n\n** randompage-url|randompage\n\n* faqpage|FAQ\n\n* helppage|help\n\n* portal-url|portal\n\n* currentevents-url|currentevents"
+	"bouquet-navigation": "* mainpage|mainpage-description\n\n** recentchanges-url|recentchanges\n\n** randompage-url|randompage\n\n* faqpage|FAQ\n\n* helppage|help\n\n* portal-url|portal\n\n* currentevents-url|currentevents",
+	"theme-name-bouquet-forgetmenot": "Forget Me Not",
+	"theme-name-bouquet-pinkdogwood": "Pink Dogwood",
+	"theme-name-bouquet-tigerlily": "Tiger Lily"
 }

@@ -25,8 +25,10 @@ class BouquetTemplate extends BaseTemplate {
 		$services = MediaWikiServices::getInstance();
 		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
 		$stylePath = $services->getMainConfig()->get( 'StylePath' );
+		$skin = $this->data['skin'];
+		$fallbackTheme = self::getSkinBouquetFallbackTheme();
 
-		$defaultTheme = self::getDefaultTheme();
+		$defaultTheme = self::getDefaultTheme( $skin->getSkinName(), $fallbackTheme );
 		$logoURL = '';
 
 		if ( is_object( $customLogo ) ) {
@@ -36,7 +38,6 @@ class BouquetTemplate extends BaseTemplate {
 			$logoURL = "{$stylePath}/Bouquet/resources/images/pink-header.png";
 			// Pasta from /extensions/Theme/Theme.php
 			$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-			$skin = $this->data['skin'];
 			$context = $skin->getContext();
 			$themeFromRequest = $context->getRequest()->getRawVal( 'usetheme' )
 				?? $userOptionsLookup->getOption( $context->getUser(), 'theme' )
@@ -47,7 +48,7 @@ class BouquetTemplate extends BaseTemplate {
 			} elseif ( $defaultTheme !== 'default' ) {
 				$themeName = $defaultTheme;
 			} else {
-				$themeName = self::getSkinBouquetFallbackTheme();
+				$themeName = $fallbackTheme;
 			}
 
 			// internal (hyphenless) theme name -> directory/logo file mapping
@@ -73,9 +74,9 @@ class BouquetTemplate extends BaseTemplate {
 	/**
 	 * Gets all enabled themes and skips the specified ones.
 	 */
-	public static function getAvailableThemes(): array {
-
-		$ourSkin = 'bouquet';
+	public static function getAvailableThemes( string $ourSkin ): array {
+		// Paranoia
+		$ourSkin = strtolower( $ourSkin );
 
 		$themes = ExtensionRegistry::getInstance()->getAttribute( 'ThemeModules' );
 
@@ -111,12 +112,11 @@ class BouquetTemplate extends BaseTemplate {
 	/**
 	 * Gets the default theme.
 	 */
-	public static function getDefaultTheme(): string {
+	public static function getDefaultTheme( string $ourSkin, string $hardcodedFallback ): string {
 
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
-		$availableThemes = self::getAvailableThemes();
-		$hardcodedFallback = self::getSkinBouquetFallbackTheme();
+		$availableThemes = self::getAvailableThemes( $ourSkin );
 
 		$fallbackTheme = $config->has( 'FallbackTheme' )
 				? $config->get( 'FallbackTheme' )

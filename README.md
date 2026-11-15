@@ -87,3 +87,4 @@ Version 2.2.2 - Nov 15, 2026
 Version 2.2.3 - Nov 15, 2026
 
 - Take the functions ´getAvailableThemes()´, ´getDefaultTheme()´, ´getSkinBouquetFallbackTheme()´ from skin ´Monaco´.
+- Translate names in ´i18n´.
