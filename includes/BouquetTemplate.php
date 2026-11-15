@@ -21,8 +21,8 @@ class BouquetTemplate extends BaseTemplate {
 	private function getLogo() {
 
 		$config = new GlobalVarConfig();
-		$defaultTheme = $config->get( "DefaultTheme" );
-		$stylePath = $config->get( "StylePath" );
+		$defaultTheme = $config->get( 'DefaultTheme' );
+		$stylePath = $config->get( 'StylePath' );
 
 		$logoURL = '';
 		$customLogo = MediaWikiServices::getInstance()->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
@@ -70,8 +70,7 @@ class BouquetTemplate extends BaseTemplate {
 	public function execute() {
 
 		$config = new GlobalVarConfig();
-		$sitename = $config->get( "Sitename" );
-		global $wgSitename;
+		$sitename = $config->get( 'Sitename' );
 
 		$skin = $this->getSkin();
 		$title = $skin->getTitle();
