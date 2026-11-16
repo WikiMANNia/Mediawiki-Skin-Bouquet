@@ -1,17 +1,21 @@
 {
 	"name": "Bouquet",
-	"version": "2.2.3",
+	"version": "2.3",
 	"author": [
 		"[http://automattic.com Automattic]",
 		"Jack Phoenix",
-		"Samantha Nguyen"
+		"Samantha Nguyen",
+		"WikiMANNia"
 	],
 	"url": "https://www.mediawiki.org/wiki/Skin:Bouquet",
 	"descriptionmsg": "bouquet-desc",
 	"license-name": "GPL-2.0-or-later",
 	"type": "skin",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.36.0",
+        "extensions": {
+            "Theme": ">= 3.3.2"
+        }
 	},
 	"callback": "MediaWiki\\Skin\\Bouquet\\BouquetHooks::onRegistration",
 	"ValidSkinNames": {

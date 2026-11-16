@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Skin\Bouquet;
 
+use MediaWiki\Extension\Theme\Theme;
+
 use MediaWiki\Config\GlobalVarConfig;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
@@ -26,9 +28,9 @@ class BouquetTemplate extends BaseTemplate {
 		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
 		$stylePath = $services->getMainConfig()->get( 'StylePath' );
 		$skin = $this->data['skin'];
-		$fallbackTheme = self::getSkinBouquetFallbackTheme();
+		$fallbackTheme = self::getFallbackTheme();
 
-		$defaultTheme = self::getDefaultTheme( $skin->getSkinName(), $fallbackTheme );
+		$defaultTheme = Theme::getDefaultTheme( $skin->getSkinName(), $fallbackTheme );
 		$logoURL = '';
 
 		if ( is_object( $customLogo ) ) {
@@ -72,90 +74,9 @@ class BouquetTemplate extends BaseTemplate {
 	}
 
 	/**
-	 * Gets all enabled themes and skips the specified ones.
-	 */
-	public static function getAvailableThemes( string $ourSkin ): array {
-		// Paranoia
-		$ourSkin = strtolower( $ourSkin );
-
-		$themes = ExtensionRegistry::getInstance()->getAttribute( 'ThemeModules' );
-
-		if ( !isset( $themes[$ourSkin] ) ) {
-			$themes[$ourSkin] = [];
-		}
-
-		// Skin Bouquet has no skip list at the moment!
-		return $themes[$ourSkin];
-
-		// Filter out the themes defined in $wgSkipThemes for a skin, if any
-		$skipThemes = MediaWikiServices::getInstance()->getMainConfig()->get( 'BouquetSkipThemes' );
-
-		if ( !is_array( $skipThemes ) ) {
-			wfLogWarning(
-				"SkinBouquet: Invalid configuration: 'BouquetSkipThemes' must be an array. Ignoring configuration."
-			);
-			$skipThemes = [];
-		}
-
-		foreach ( $skipThemes as $skippable ) {
-
-			$key = array_search( $skippable, $themes[$ourSkin], true );
-
-			if ( $key !== false ) {
-				unset( $themes[$ourSkin][$key] );
-			}
-		}
-
-		return !empty( $themes[$ourSkin] ) ? $themes[$ourSkin] : [ 'default' => 'default' ];
-	}
-
-	/**
-	 * Gets the default theme.
-	 */
-	public static function getDefaultTheme( string $ourSkin, string $hardcodedFallback ): string {
-
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-
-		$availableThemes = self::getAvailableThemes( $ourSkin );
-
-		$fallbackTheme = $config->has( 'FallbackTheme' )
-				? $config->get( 'FallbackTheme' )
-				: $hardcodedFallback;
-		$defaultTheme = $config->has( 'DefaultTheme' )
-				? $config->get( 'DefaultTheme' )
-				: $fallbackTheme;
-
-		// Validate default theme
-		if (
-			!is_string( $defaultTheme ) ||
-			!in_array( $defaultTheme, $availableThemes, true )
-		) {
-			$defaultTheme = $fallbackTheme;
-		}
-
-		// Validate fallback theme
-		if (
-			!is_string( $defaultTheme ) ||
-			!in_array( $defaultTheme, $availableThemes, true )
-		) {
-  			$defaultTheme = $hardcodedFallback;
-		}
-
-		// Last resort: use the first available theme
-		if (
-  			!is_string( $defaultTheme ) ||
-  			!in_array( $defaultTheme, $availableThemes, true )
-		) {
-  			$defaultTheme = reset( $availableThemes );
-		}
-
-		return $defaultTheme;
-	}
-
-	/**
 	 * Fallback, if ´$wgDefaultTheme´ is not valid
 	 */
-	private static function getSkinBouquetFallbackTheme(): string {
+	private static function getFallbackTheme(): string {
 		return 'forgetmenot';
 	}
 
