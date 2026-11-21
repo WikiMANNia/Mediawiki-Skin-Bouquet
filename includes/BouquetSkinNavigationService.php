@@ -14,9 +14,7 @@ class BouquetSkinNavigationService {
 
 	const version = '0.01';
 
-	/**
-	 * @var bool Should the message we're rendering be parsed in the wiki's content language?
-	 */
+	/** @var bool Is the message we're supposed to parse in the wiki's content language (true) or not? */
 	public $forContent;
 
 	/**

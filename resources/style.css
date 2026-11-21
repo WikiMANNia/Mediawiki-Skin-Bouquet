@@ -214,7 +214,7 @@ input#searchInput, input#searchInputTop {
 	width: 77%;
 }
 #primary input#searchInput, #primary input#searchInputTop {
-	background: #fafafa url("images/search-bg.png") no-repeat scroll 10px 8px;
+	background: #fafafa url(images/search-bg.png) no-repeat scroll 10px 8px;
 	border: 1px solid #e7d9b9;
 	box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
 }

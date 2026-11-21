@@ -1,0 +1,173 @@
+#content {
+	background-color: #000;
+	border: 5px solid #fabd23;
+}
+#main .widget-area {
+	background-color: #000060;
+	border: 5px solid #fabd23;
+}
+body {
+	background: url(body-bg.png) repeat-x fixed bottom #000;
+	color: #fff;
+}
+input#searchInput, input#searchInputTop {
+	background-color: #e9b69e url(search-bg.png) no-repeat 10px 8px;
+	border-color: #fabd23;
+	color: #000060;
+}
+#primary input#searchInput, #primary input#searchInputTop {
+	background-color: #e9b69e url(search-bg.png) no-repeat 10px 8px;
+	border-color: #fabd23;
+}
+.mw-heading,
+h1, h2, h3, h4, h5, h6 {
+	color: #fff;
+}
+a {
+	color: #fff;
+}
+a.new {
+	color: #ddd;
+}
+a:visited,
+a.new:visited {
+	color: #ddd;
+}
+#branding {
+	background-color: #000;
+	background-repeat: no-repeat;
+/*	background-color: url(wipi-header.png) no-repeat fixed right #000; */
+}
+
+#site-title a,
+#site-title a:hover {
+	background-color: transparent;
+	color: #fff;
+}
+#site-description {
+	color: #746050;
+}
+#access {
+	background-color: #000060;
+}
+#access a {
+	color: #ffebce;
+}
+#access a:hover {
+	background-color: #e2f3ff;
+	color: #fff;
+}
+#access ul ul a {
+	background-color: rgba(0,0,96,0.7);
+	color: #fff;
+}
+#access li:hover > a,
+#access ul ul :hover > a,
+#access ul ul a:hover {
+	background-color: rgba(0,0,96,0.7);
+	color: #fff;
+}
+#search-area {
+	background-color: #371212;
+}
+.archive-title {
+	color: #1c481d;
+}
+.entry-title {
+	color: #fff;
+	font: 33px/41px 'Sorts Mill Goudy',serif;
+	margin-bottom: 0.3em;
+	text-shadow: 1px 1px 0 rgba(250,189,35,1);
+}
+.entry-title a {
+	color: #fff;
+}
+.entry-title a:hover {
+	color: #cacaf7;
+	text-decoration: none;
+}
+.entry-date {
+	background-color: #f9e4d8;
+}
+.entry-date a {
+	color: #1c481d;
+}
+.entry-content table {
+	border: 1px solid #e6d1c6;
+}
+.entry-content tr td {
+	border-color: #e6d1c6;
+}
+.entry-content tr.odd td {
+	background-color: #f9cdb5;
+}
+.entry-content pre,
+.entry-content ins {
+	background-color: #f9cdb5;
+}
+.entry-content hr {
+	background-color: #f9cdb5;
+}
+.entry-meta {
+	color: #2f331c;
+}
+.page-link a {
+	background-color: #ca4200;
+}
+.page-link a:hover {
+	background-color: #e2f3ff;
+}
+.widget-title,
+.widget-title a {
+	color: #fff;
+	text-shadow: 1px 1px 0 rgba(250,189,35,1);
+}
+.widget ul li {
+	border-color: #fabd23;
+	border-bottom: 1px solid #fabd23;
+}
+#site-generator {
+	color: #000060;
+}
+#site-generator a {
+	color: #fd9d66;
+}
+textarea {
+	background-color: #000060;
+	color: #fff;
+	width: 100%;
+}
+.catlinks {
+	background-color: #371212;
+	clear: both;
+	margin-top: 1em;
+	border-top: 1px solid #fabd23;
+	border-bottom: 1px solid #fabd23;
+	border-left: none;
+	border-right: none;
+	padding: 5px;
+	text-align: center;
+}
+.wikitable > tr > th,
+.wikitable > * > tr > th {
+	background-color: #eaecf0;
+	color: #0000f0;
+}
+.wikitable a,
+.wikitable a:visited
+{
+	color: #0000f0;
+}
+.mw-heading,
+h1, h2, h3, h4, h5, h6 {
+	color: #fabd23;
+}
+#toc {
+	background-color: #fff;
+	color: #0000f0;
+	.tocnumber,
+	.toctext,
+	.toctitle {
+			color: #0000f0;
+	}
+}

@@ -9,7 +9,6 @@ use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\Sanitizer;
-use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Skin\BaseTemplate;
 use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\User\Options\UserOptionsLookup;
@@ -25,49 +24,57 @@ class BouquetTemplate extends BaseTemplate {
 	private function getLogo() {
 
 		$services = MediaWikiServices::getInstance();
-		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
-		$stylePath = $services->getMainConfig()->get( 'StylePath' );
-		$skin = $this->data['skin'];
+		$config = $services->getMainConfig();
+		$skin = $this->getSkin();
+		$skinName = $skin->getSkinName();
+		$stylePath = $config->get( 'StylePath' );
+		$availableThemes = Theme::getAvailableThemes( $skinName );
 		$fallbackTheme = self::getFallbackTheme();
+		$defaultTheme = Theme::getDefaultTheme( $skinName, $fallbackTheme );
+		$disableSelectThemes = Theme::isDisabledSelectThemes( $skinName );
 
-		$defaultTheme = Theme::getDefaultTheme( $skin->getSkinName(), $fallbackTheme );
 		$logoURL = '';
+		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
 
 		if ( is_object( $customLogo ) ) {
 			// Prefer a custom logo over the defaults (obviously!)
 			$logoURL = $customLogo->getUrl();
 		} else {
 			$logoURL = "{$stylePath}/Bouquet/resources/images/pink-header.png";
-			// Pasta from /extensions/Theme/Theme.php
-			$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-			$context = $skin->getContext();
-			$themeFromRequest = $context->getRequest()->getRawVal( 'usetheme' )
-				?? $userOptionsLookup->getOption( $context->getUser(), 'theme' )
-				?? $defaultTheme;
+			$themeName = $defaultTheme;
 
-			if ( $themeFromRequest ) {
-				$themeName = $themeFromRequest;
-			} elseif ( $defaultTheme !== 'default' ) {
-				$themeName = $defaultTheme;
-			} else {
-				$themeName = $fallbackTheme;
+			if ( !$disableSelectThemes ) {
+				// Pasta from /extensions/Theme/Theme.php
+				$userOptionsLookup = $services->getUserOptionsLookup();
+				$context = $skin->getContext();
+				$themeFromRequest = $skin->getRequest()->getRawVal( 'usetheme' );
+				$themeFromLookup = $userOptionsLookup->getOption( $context->getUser(), 'theme' );
+
+				if ( in_array( $themeFromRequest, $availableThemes, true ) ) {
+					$themeName = $themeFromRequest;
+				} elseif ( in_array( $themeFromLookup, $availableThemes, true ) ) {
+					$themeName = $themeFromLookup;
+				} elseif ( in_array( $defaultTheme, $availableThemes, true ) ) {
+					$themeName = $defaultTheme;
+				} else {
+					$themeName = false;
+				}
 			}
 
 			// internal (hyphenless) theme name -> directory/logo file mapping
 			// yes, this is lame as hell and I should just rename the dirs & files instead
 			$map = [
+				'blackrose' => 'black-rose',
 				'forgetmenot' => 'forget-me-not',
 				'pinkdogwood' => 'pink-dogwood',
 				'tigerlily' => 'tiger-lily'
 			];
 
-			if ( $themeName !== false ) {
-				if ( isset( $map[$themeName] ) && $map[$themeName] ) {
-					$themeName = $map[$themeName];
-				}
-				// Use the theme name directly, if it is not in the map.
-				$logoURL = "{$stylePath}/Bouquet/resources/colors/{$themeName}/{$themeName}-header.png";
+			if ( isset( $map[$themeName] ) && $map[$themeName] ) {
+				$themeName = $map[$themeName];
 			}
+			// Use the theme name directly, if it is not in the map.
+			$logoURL = "{$stylePath}/Bouquet/resources/colors/{$themeName}/{$themeName}-header.png";
 		}
 
 		return $logoURL;
@@ -90,19 +97,18 @@ class BouquetTemplate extends BaseTemplate {
 
 		$config = new GlobalVarConfig();
 		$sitename = $config->get( 'Sitename' );
+		$logo_link = $this->getLogo();
+		$mainpage_url = $this->data['nav_urls']['mainpage']['href'];
 
 		$skin = $this->getSkin();
 		$title = $skin->getTitle();
-		$logo_url = $this->getLogo();
-		$mainpage_url = $this->data['nav_urls']['mainpage']['href'];
-
 		$this->data['pageLanguage'] = $title->getPageLanguage()->getHtmlCode();
 
 ?>
 <div id="page" class="hfeed">
-	<header id="branding" role="banner" class="clearfix" style="background-image: url(<?php echo $logo_url; ?>);">
+	<header id="branding" role="banner" class="clearfix" style="background-image: url(<?php echo $logo_link; ?>);">
 		<?php echo Html::element( 'a', [
-				'href' => $this->data['nav_urls']['mainpage']['href'],
+				'href' => $mainpage_url,
 				'class' => 'header-link',
 				'title' => $sitename,
 				'rel' => 'home'
@@ -134,17 +140,11 @@ class BouquetTemplate extends BaseTemplate {
 								$i = $counter = 0;
 								foreach ( $menuNodes[0]['children'] as $level0 ) {
 									$hasChildren = isset( $menuNodes[$level0]['children'] );
+									$href = htmlspecialchars( $menuNodes[$level0]['href'], ENT_QUOTES );
+									$text = htmlspecialchars( $menuNodes[$level0]['text'], ENT_QUOTES );
 							?>
 					<li class="page_item<?php echo ( $hasChildren ? ' page_item_has_children' : '' ) ?>">
-						<a class="nav<?php echo $counter ?>_link" href="<?php echo htmlspecialchars( $menuNodes[$level0]['href'], ENT_QUOTES ) ?>">
-							<?php
-								// @note The suppression might be incorrect, (though I doubt it), but regardless of
-								// its presence or absence, phan still complains; so pick your poison,
-								// I guess.
-								// @phan-suppress-next-line SecurityCheck-DoubleEscaped
-								echo htmlspecialchars( $menuNodes[$level0]['text'], ENT_QUOTES )
-							?>
-						</a>
+						<a class="nav<?php echo $counter ?>_link" href="<?php echo $href; ?>"><?php echo $text; ?></a>
 						<?php if ( $hasChildren ) { ?>
 						<ul class="children">
 <?php
@@ -153,15 +153,7 @@ class BouquetTemplate extends BaseTemplate {
 								$text = htmlspecialchars( $menuNodes[$level1]['text'], ENT_QUOTES );
 ?>
 							<li class="page_item">
-								<a href="<?php echo $href ?>">
-									<?php
-										// @note The suppression might be incorrect, (though I doubt it), but regardless of
-										// its presence or absence, phan still complains; so pick your poison,
-										// I guess.
-										// @phan-suppress-next-line SecurityCheck-DoubleEscaped
-										echo $text
-									?>
-								</a>
+								<a href="<?php echo $href; ?>"><?php echo $text; ?></a>
 							</li>
 <?php
 										}
@@ -337,24 +329,24 @@ class BouquetTemplate extends BaseTemplate {
 ?>
 		<aside id="search-3" class="widget widget_search" role="search">
 			<form role="search" method="get" id="searchform" class="searchform" action="<?php $this->text( 'wgScript' ) ?>">
-			<div>
-				<label class="screen-reader-text" for="searchInput"><?php $this->msg( 'search' ) ?></label>
-				<input type="hidden" name="title" value="<?php $this->text( 'searchtitle' ) ?>"/>
-				<?php
-					echo $this->makeSearchInput( [ 'id' => 'searchInput' ] );
-					echo $this->makeSearchButton( 'go', [
-						'id' => 'searchGoButton',
-						'class' => 'searchButton',
-						'value' => $this->getMsg( 'searcharticle' )->text()
-					] );
-					echo '&#160;';
-					echo $this->makeSearchButton( 'fulltext', [
-						'id' => 'mw-searchButton',
-						'class' => 'searchButton',
-						'value' => $this->getMsg( 'searchbutton' )->text()
-					] );
-				?>
-			</div>
+				<div>
+					<label class="screen-reader-text" for="searchInput"><?php $this->msg( 'search' ) ?></label>
+					<input type="hidden" name="title" value="<?php $this->text( 'searchtitle' ) ?>"/>
+					<?php
+						echo $this->makeSearchInput( [ 'id' => 'searchInput' ] );
+						echo $this->makeSearchButton( 'go', [
+							'id' => 'searchGoButton',
+							'class' => 'searchButton',
+							'value' => $this->getMsg( 'searcharticle' )->text()
+						] );
+						echo '&#160;';
+						echo $this->makeSearchButton( 'fulltext', [
+							'id' => 'mw-searchButton',
+							'class' => 'searchButton',
+							'value' => $this->getMsg( 'searchbutton' )->text()
+						] );
+					?>
+				</div>
 			</form>
 		</aside>
 <?php
