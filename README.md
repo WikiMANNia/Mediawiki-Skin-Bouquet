@@ -110,3 +110,7 @@ Version 2.3 - Nov 16, 2026
 
 - Use the functions ´getAvailableThemes()´, ´getDefaultTheme()´ from extension ´Theme´.
 - Requires extension ´Theme´ version 3.3.2.
+
+Version 2.4 - Nov 21, 2026
+
+- Add global variable ´DisableSelectThemes´.
