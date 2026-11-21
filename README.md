@@ -19,7 +19,6 @@ Aktuell sind das die Themen:
 Currently, the themes are:
 
 Actualmente, los temas disponibles son:
-* ´blackrose´
 * ´forgetmenot´
 * ´pinkdogwood´
 * ´tigerlily´
@@ -37,8 +36,8 @@ Disable the selection of themes in user's preferences:
 
 Exclude individual themes from the theme selection in user's preferences:
 ´$wgSkipThemes['bouquet'] = [
-		'blackrose' => true,
-		'pinkdogwood' => true
+		'pinkdogwood' => true,
+		'tigerlily' => true
 	];´
 
 ## Compatibility
@@ -111,11 +110,3 @@ Version 2.3 - Nov 16, 2026
 
 - Use the functions ´getAvailableThemes()´, ´getDefaultTheme()´ from extension ´Theme´.
 - Requires extension ´Theme´ version 3.3.2.
-
-Version 2.4 - Nov 21, 2026
-
-- Add global variable ´DisableSelectThemes´.
-
-Version 2.5 - Nov 21, 2026
-
-- Add theme ´blackrose´.

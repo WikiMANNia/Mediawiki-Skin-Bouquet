@@ -1,6 +1,6 @@
 {
 	"name": "Bouquet",
-	"version": "2.5",
+	"version": "2.3",
 	"author": [
 		"[http://automattic.com Automattic]",
 		"Jack Phoenix",
@@ -14,7 +14,7 @@
 	"requires": {
 		"MediaWiki": ">= 1.36.0",
         "extensions": {
-            "Theme": ">= 3.4"
+            "Theme": ">= 3.3.2"
         }
 	},
 	"callback": "MediaWiki\\Skin\\Bouquet\\BouquetHooks::onRegistration",
@@ -49,7 +49,6 @@
 		"Theme": {
 			"Modules": {
 				"bouquet": [
-					"blackrose",
 					"forgetmenot",
 					"pinkdogwood",
 					"tigerlily"
@@ -104,13 +103,6 @@
 		},
 		"skins.bouquet.js": {
 			"scripts": "resources/js/navigation.js"
-		},
-		"themeloader.skins.bouquet.blackrose": {
-			"styles": {
-				"resources/colors/black-rose/black-rose.css": {
-					"media": "screen"
-				}
-			}
 		},
 		"themeloader.skins.bouquet.forgetmenot": {
 			"styles": {
