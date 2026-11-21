@@ -28,10 +28,10 @@ class BouquetTemplate extends BaseTemplate {
 		$skin = $this->getSkin();
 		$skinName = $skin->getSkinName();
 		$stylePath = $config->get( 'StylePath' );
-		$availableThemes = Theme::getAvailableThemes( $skinName );
-		$fallbackTheme = self::getFallbackTheme();
-		$defaultTheme = Theme::getDefaultTheme( $skinName, $fallbackTheme );
-		$disableSelectThemes = Theme::isDisabledSelectThemes( $skinName );
+		$defaultTheme =
+			$config->has( 'DefaultTheme' )
+			? $config->get( 'DefaultTheme' )
+			: self::getFallbackTheme();
 
 		$logoURL = '';
 		$customLogo = $services->getRepoGroup()->findFile( 'Bouquet-skin-logo.png' );
@@ -41,24 +41,23 @@ class BouquetTemplate extends BaseTemplate {
 			$logoURL = $customLogo->getUrl();
 		} else {
 			$logoURL = "{$stylePath}/Bouquet/resources/images/pink-header.png";
-			$themeName = $defaultTheme;
+			// $wgDefaultTheme is provided by [[mw:Extension:Theme]] and it is set
+			// by default at least on ShoutWiki, but probably not elsewhere
+			// Grumble grumble grumble...
+			// Pasta from /extensions/Theme/Theme.php
+			$userOptionsLookup = $services->getUserOptionsLookup();
+			$context = $skin->getContext();
+			$themeFromRequest = $skin->getRequest()->getRawVal( 'usetheme' );
+			$themeFromLookup = $userOptionsLookup->getOption( $context->getUser(), 'theme' );
 
-			if ( !$disableSelectThemes ) {
-				// Pasta from /extensions/Theme/Theme.php
-				$userOptionsLookup = $services->getUserOptionsLookup();
-				$context = $skin->getContext();
-				$themeFromRequest = $skin->getRequest()->getRawVal( 'usetheme' );
-				$themeFromLookup = $userOptionsLookup->getOption( $context->getUser(), 'theme' );
-
-				if ( in_array( $themeFromRequest, $availableThemes, true ) ) {
-					$themeName = $themeFromRequest;
-				} elseif ( in_array( $themeFromLookup, $availableThemes, true ) ) {
-					$themeName = $themeFromLookup;
-				} elseif ( in_array( $defaultTheme, $availableThemes, true ) ) {
-					$themeName = $defaultTheme;
-				} else {
-					$themeName = false;
-				}
+			if ( $themeFromRequest ) {
+				$themeName = $themeFromRequest;
+			} elseif ( $themeFromLookup ) {
+				$themeName = $themeFromLookup;
+			} elseif ( !empty( $defaultTheme ) && ( $defaultTheme !== 'default' ) ) {
+				$themeName = $defaultTheme;
+			} else {
+				$themeName = false;
 			}
 
 			// internal (hyphenless) theme name -> directory/logo file mapping

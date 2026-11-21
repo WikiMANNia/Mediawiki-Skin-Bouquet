@@ -1,6 +1,6 @@
 {
 	"name": "Bouquet",
-	"version": "2.4",
+	"version": "2.3",
 	"author": [
 		"[http://automattic.com Automattic]",
 		"Jack Phoenix",
@@ -14,7 +14,7 @@
 	"requires": {
 		"MediaWiki": ">= 1.36.0",
         "extensions": {
-            "Theme": ">= 3.4"
+            "Theme": ">= 3.3.2"
         }
 	},
 	"callback": "MediaWiki\\Skin\\Bouquet\\BouquetHooks::onRegistration",
